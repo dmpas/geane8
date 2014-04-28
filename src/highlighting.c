@@ -1058,6 +1058,7 @@ void highlighting_init_styles(guint filetype_idx, GKeyFile *config, GKeyFile *co
 		init_styleset_case(VERILOG);
 		init_styleset_case(XML);
 		init_styleset_case(YAML);
+		init_styleset_case(E8Script);
 		default:
 			if (ft->lexer_filetype)
 				geany_debug("Filetype %s has a recursive lexer_filetype %s set!",
@@ -1141,6 +1142,7 @@ void highlighting_set_styles(ScintillaObject *sci, GeanyFiletype *ft)
 		styleset_case(VERILOG);
 		styleset_case(XML);
 		styleset_case(YAML);
+		styleset_case(E8Script);
 		case GEANY_FILETYPES_NONE:
 		default:
 			styleset_default(sci, ft->id);
@@ -1551,6 +1553,8 @@ gboolean highlighting_is_string_style(gint lexer, gint style)
 				style == SCE_RUST_STRING ||
 				style == SCE_RUST_STRINGR ||
 				style == SCE_RUST_LEXERROR);
+		case SCLEX_E8Script:
+			return (style == SCE_E8_STRING || style == SCE_E8_STRINGEOL);
 	}
 	return FALSE;
 }
@@ -1658,11 +1662,12 @@ gboolean highlighting_is_comment_style(gint lexer, gint style)
 				style == SCE_HA_LITERATE_CODEDELIM);
 
 		case SCLEX_FREEBASIC:
-			return (style == SCE_B_COMMENT ||
-				style == SCE_B_COMMENTBLOCK ||
-				style == SCE_B_DOCLINE ||
-				style == SCE_B_DOCBLOCK ||
-				style == SCE_B_DOCKEYWORD);
+			return (style == SCE_B_COMMENT
+//				style == SCE_B_COMMENTBLOCK ||
+//				style == SCE_B_DOCLINE ||
+//				style == SCE_B_DOCBLOCK ||
+//				style == SCE_B_DOCKEYWORD
+				);
 
 		case SCLEX_YAML:
 			return (style == SCE_YAML_COMMENT);
@@ -1710,6 +1715,15 @@ gboolean highlighting_is_comment_style(gint lexer, gint style)
 				style == SCE_RUST_COMMENTLINE ||
 				style == SCE_RUST_COMMENTBLOCKDOC ||
 				style == SCE_RUST_COMMENTLINEDOC);
+				
+		case SCLEX_E8Script:
+			return (
+				style == SCE_E8_COMMENT
+				|| style == SCE_E8_MULTYLINE_COMMENT
+				|| style == SCE_E8_DOC
+				|| style == SCE_E8_MULTYLINE_DOC
+			)
+			;
 	}
 	return FALSE;
 }

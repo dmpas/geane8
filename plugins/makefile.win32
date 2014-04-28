@@ -2,7 +2,8 @@
 
 CC = gcc
 CXX = g++
-PREFIX = C:/libs
+#PREFIX = C:/libs
+PREFIX = C:/home/dmpas/gtkmm64
 RM = del
 -include ../localwin32.mk
 
@@ -26,7 +27,7 @@ GTK_INCLUDES= \
 
 INCLUDEDIRS=  -I.. \
               -I../src \
-              -I../scintilla/include \
+              -I../../e8-scintilla-patch/include \
               -I../tagmanager/src \
               $(GTK_INCLUDES)
 

@@ -168,10 +168,10 @@ static const HLStyle highlighting_styles_BASIC[] =
 {
 	{ SCE_B_DEFAULT,		"default",			FALSE },
 	{ SCE_B_COMMENT,		"comment",			FALSE },
-	{ SCE_B_COMMENTBLOCK,	"commentblock",		FALSE },
-	{ SCE_B_DOCLINE,		"docline",			FALSE },
-	{ SCE_B_DOCBLOCK,		"docblock",			FALSE },
-	{ SCE_B_DOCKEYWORD,		"dockeyword",		FALSE },
+//	{ SCE_B_COMMENTBLOCK,	"commentblock",		FALSE },
+//	{ SCE_B_DOCLINE,		"docline",			FALSE },
+//	{ SCE_B_DOCBLOCK,		"docblock",			FALSE },
+//	{ SCE_B_DOCKEYWORD,		"dockeyword",		FALSE },
 	{ SCE_B_NUMBER,			"number",			FALSE },
 	{ SCE_B_KEYWORD,		"word",				FALSE },
 	{ SCE_B_STRING,			"string",			FALSE },
@@ -238,7 +238,7 @@ static const HLStyle highlighting_styles_C[] =
 	{ SCE_C_STRING,					"string",					FALSE },
 	{ SCE_C_STRINGRAW,				"stringraw",				FALSE },
 	{ SCE_C_CHARACTER,				"character",				FALSE },
-	{ SCE_C_USERLITERAL,			"userliteral",				FALSE },
+//	{ SCE_C_USERLITERAL,			"userliteral",				FALSE },
 	{ SCE_C_UUID,					"uuid",						FALSE },
 	{ SCE_C_PREPROCESSOR,			"preprocessor",				FALSE },
 	{ SCE_C_OPERATOR,				"operator",					FALSE },
@@ -1557,6 +1557,44 @@ static const HLKeyword highlighting_keywords_YAML[] =
 	{ 0, "keywords",	FALSE }
 };
 #define highlighting_properties_YAML	EMPTY_PROPERTIES
+
+
+//++ dmpas
+
+/* E8Script */
+#define highlighting_lexer_E8Script		SCLEX_E8Script
+static const HLStyle highlighting_styles_E8Script[] =
+{
+	{ SCE_E8_DEFAULT,		"default",			FALSE },
+	{ SCE_E8_COMMENT,		"comment",			FALSE },
+	{ SCE_E8_MULTYLINE_COMMENT,	"comment",		FALSE },
+	{ SCE_E8_DOC,			"docline",			FALSE },
+	{ SCE_E8_MULTYLINE_DOC,	"docline",			FALSE },
+	{ SCE_E8_NUMBER,		"number",			FALSE },
+	{ SCE_E8_KEYWORD,		"word",				FALSE },
+	{ SCE_E8_STRING,		"string",			FALSE },
+	{ SCE_E8_PREPROCESSOR,	"preprocessor",		FALSE },
+	{ SCE_E8_OPERATOR,		"operator",			FALSE },
+	{ SCE_E8_IDENTIFIER,	"identifier",		FALSE },
+	{ SCE_E8_DATE,			"date",				FALSE },
+	{ SCE_E8_STRINGEOL,		"stringeol",		FALSE },
+	{ SCE_E8_KEYWORD2,		"word2",			FALSE },
+	{ SCE_E8_KEYWORD3,		"word3",			FALSE },
+	{ SCE_E8_KEYWORD4,		"word4",			FALSE },
+	{ SCE_E8_CONSTANT,		"constant",			FALSE },
+	{ SCE_E8_ERROR,			"error",			FALSE },
+	{ SCE_E8_HEXNUMBER,		"hexnumber",		FALSE },
+	{ SCE_E8_BINNUMBER,		"binnumber",		FALSE }
+};
+static const HLKeyword highlighting_keywords_E8Script[] =
+{
+	{ 0, "keywords",		FALSE },
+	{ 1, "preprocessor",	FALSE },
+	{ 2, "user1",			FALSE },
+	{ 3, "user2",			FALSE }
+};
+#define highlighting_properties_E8Script	EMPTY_PROPERTIES
+//-- dmpas
 
 
 #endif /* guard */

@@ -3,7 +3,8 @@
 CC = gcc
 AR = ar
 RANLIB = ranlib
-PREFIX = C:/libs
+#PREFIX = C:/libs
+PREFIX = C:/home/dmpas/gtkmm64
 RM = del
 -include ../../localwin32.mk
 

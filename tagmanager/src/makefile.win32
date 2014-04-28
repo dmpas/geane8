@@ -3,7 +3,8 @@
 CC = gcc
 AR = ar
 RANLIB = ranlib
-PREFIX = C:/libs
+# PREFIX = C:/libs
+PREFIX = C:/home/dmpas/gtkmm64
 RM = del
 -include ../../localwin32.mk
 
@@ -15,6 +16,7 @@ COMPLIB=tagmanager.a
 
 REGEX_DEFINES = -DHAVE_REGCOMP -DSTDC_HEADERS=1
 
+#-IC:/home/dmpas/gtkmm64/include/glib-2.0 -IC:/home/dmpas/gtkmm64/lib/glib-2.0/include  
 GTK_INCLUDES= \
 	-I$(PREFIX)/include/gtk-2.0 \
 	-I$(PREFIX)/lib/gtk-2.0/include \

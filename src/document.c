@@ -88,9 +88,7 @@ GeanyFilePrefs file_prefs;
  * although usually you would just use the foreach_document() macro.
  *
  * Never assume that the order of document pointers is the same as the order of notebook tabs.
- * Notebook tabs can be reordered. Use @c document_get_from_page().
- *
- * @see documents. */
+ * Notebook tabs can be reordered. Use @c document_get_from_page(). */
 GPtrArray *documents_array = NULL;
 
 
@@ -2831,7 +2829,7 @@ const GdkColor *document_get_status_color(GeanyDocument *doc)
 }
 
 
-/** Accessor function for @ref documents_array items.
+/** Accessor function for @ref GeanyData::documents_array items.
  * @warning Always check the returned document is valid (@c doc->is_valid).
  * @param idx @c documents_array index.
  * @return The document, or @c NULL if @a idx is out of range.
