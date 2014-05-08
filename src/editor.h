@@ -166,6 +166,23 @@ struct GeanyEditor
 	GeanyIndentType	 indent_type;	/* Use editor_get_indent_prefs() instead. */
 	gboolean		 line_breaking;	/**< Whether to split long lines as you type. */
 	gint			 indent_width;
+	
+	//++ dmpas
+	struct {
+
+		int hherer_flag;
+		int hherer_mode;
+		int QQ_flag;
+		int NN_flag;
+
+		int DOT_flag;
+		int DOT_comp; /* 0 - нет, -1 - меньше, +1 - больше */
+		int DOT_equa; /* 0 - строго, 1 - или равно */
+
+		int NE_flag;
+
+	} e8sup;
+	//-- dmpas
 };
 
 

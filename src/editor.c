@@ -735,12 +735,198 @@ static void autocomplete_scope(GeanyEditor *editor)
 	}
 }
 
+//++ dmpas
+static int cyr_h = 1093, cyr_H = 1061;
+static int cyr_er = 1098, cyr_ER = 1066;
+
+static int sym_NN = 8470;
+static int cyr_b = 1073, cyr_B = 1041;
+static int cyr_m = 1084, cyr_M = 1052;
+static int cyr_r = 1088, cyr_R = 1056;
+static int cyr_ch = 1095, cyr_CH = 1063;
+
+static void sci_delete_range(ScintillaObject *sci, gint pos, gint deleteLength)
+{
+	scintilla_send_message(sci, SCI_DELETERANGE, pos, deleteLength);
+}
+
+
+static void sci_delete_last_chars(ScintillaObject *sci, gint count)
+{
+    gint pos = sci_get_current_position(sci);
+    sci_delete_range(sci, pos - count, count);
+}
+
+
+/* Проверка на "ххъъ" => [] */
+static int check_hherer(ScintillaObject *sci, struct SCNotification *nt, GeanyEditor *d)
+{
+    if (nt->ch == cyr_h || nt->ch == cyr_H) {
+
+        if (d->e8sup.hherer_flag < 2) {
+            ++d->e8sup.hherer_flag;
+            d->e8sup.hherer_mode = (nt->ch == cyr_H) ? 1 : 0;
+        }
+        else
+            d->e8sup.hherer_flag = 0;
+
+        return TRUE;
+
+    } else if (nt->ch == cyr_er || nt->ch == cyr_ER) {
+
+        if (d->e8sup.hherer_flag == 2)
+            ++d->e8sup.hherer_flag;
+        else if (d->e8sup.hherer_flag == 3) {
+
+            sci_delete_last_chars(sci, 8); /* x2 для UTF-8 */
+            if (d->e8sup.hherer_mode)
+                sci_add_text(sci, "{}");
+            else
+                sci_add_text(sci, "[]");
+
+            gint pos = sci_get_current_position(sci);
+            sci_set_current_position(sci, pos - 1, TRUE);
+
+            d->e8sup.hherer_flag = 0;
+        } else
+            d->e8sup.hherer_flag = 0;
+
+        return TRUE;
+
+    } else
+        d->e8sup.hherer_flag = 0;
+
+    return FALSE;
+}
+
+static int check_QQ(ScintillaObject *sci, struct SCNotification *nt, GeanyEditor *d)
+{
+    if (nt->ch == '?') {
+
+        if (d->e8sup.QQ_flag) {
+            d->e8sup.QQ_flag = 0;
+            sci_delete_last_chars(sci, 2);
+            sci_add_text(sci, "&");
+        } else
+            ++d->e8sup.QQ_flag;
+
+        return TRUE;
+    }
+    d->e8sup.QQ_flag = 0;
+    return FALSE;
+}
+
+static int check_NN(ScintillaObject *sci, struct SCNotification *nt, GeanyEditor *d)
+{
+    if (nt->ch == sym_NN) {
+
+        if (d->e8sup.NN_flag) {
+            d->e8sup.NN_flag = 0;
+            sci_delete_last_chars(sci, 6); /* x3 для UTF-8 */
+            sci_add_text(sci, "#");
+        } else
+            ++d->e8sup.NN_flag;
+
+        return TRUE;
+    }
+    d->e8sup.NN_flag = 0;
+    return FALSE;
+}
+
+static void change_DOT(ScintillaObject *sci, int del, GeanyEditor *d)
+{
+    const char *texts[] = {">", "<", ">=", "<="};
+
+    int index = (d->e8sup.DOT_comp < 0 ? 1 : 0)
+        + (d->e8sup.DOT_equa ? 2 : 0)
+    ;
+
+    sci_delete_last_chars(sci, del);
+    sci_add_text(sci, texts[index]);
+}
+static int check_DOT(ScintillaObject *sci, struct SCNotification *nt, GeanyEditor *d)
+{
+
+    if (nt->ch == '.') {
+        d->e8sup.DOT_flag = 1;
+        d->e8sup.DOT_comp = 0;
+        d->e8sup.DOT_equa = 0;
+        return TRUE;
+    }
+    if (nt->ch == cyr_b || nt->ch == cyr_B) {
+        if (d->e8sup.DOT_flag && !d->e8sup.DOT_comp) {
+            d->e8sup.DOT_comp = 1;
+            return TRUE;
+        }
+    }
+    if (nt->ch == cyr_m || nt->ch == cyr_M) {
+        if (d->e8sup.DOT_flag && !d->e8sup.DOT_comp) {
+            d->e8sup.DOT_comp = -1;
+            return TRUE;
+        }
+    }
+    if (nt->ch == cyr_ch || nt->ch == cyr_CH || nt->ch == ' ') {
+        if (d->e8sup.DOT_flag && d->e8sup.DOT_comp) {
+            d->e8sup.DOT_equa = 0;
+            change_DOT(sci, nt->ch == ' ' ? 4 : 5, d);
+            d->e8sup.DOT_flag = 0;
+            return TRUE;
+        }
+    }
+    if (nt->ch == cyr_r || nt->ch == cyr_R) {
+        if (d->e8sup.DOT_flag && d->e8sup.DOT_comp) {
+            d->e8sup.DOT_equa = 1;
+            change_DOT(sci, 5, d);
+            d->e8sup.DOT_flag = 0;
+            return TRUE;
+        }
+    }
+    d->e8sup.DOT_flag = 0;
+    return FALSE;
+}
+
+static int check_NE(ScintillaObject *sci, struct SCNotification *nt, GeanyEditor *d)
+{
+    if (nt->ch == '!') {
+        d->e8sup.NE_flag = 1;
+        return TRUE;
+    } else if (nt->ch == '=') {
+        if (d->e8sup.NE_flag) {
+            sci_delete_last_chars(sci, 2);
+            sci_add_text(sci, "<>");
+            d->e8sup.NE_flag = 0;
+            return TRUE;
+        }
+    }
+    d->e8sup.NE_flag = 0;
+    return FALSE;
+}
+
+//-- dmpas
+
 
 static void on_char_added(GeanyEditor *editor, SCNotification *nt)
 {
 	ScintillaObject *sci = editor->sci;
 	gint pos = sci_get_current_position(sci);
 
+	//++ dmpas
+    if (check_hherer(sci, nt, editor))
+        return;
+
+    if (check_QQ(sci, nt, editor))
+        return;
+
+    if (check_NN(sci, nt, editor))
+        return;
+
+    if (check_DOT(sci, nt, editor))
+        return;
+
+    if (check_NE(sci, nt, editor))
+        return;
+	//-- dmpas
+	
 	switch (nt->ch)
 	{
 		case '\r':
