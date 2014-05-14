@@ -727,6 +727,16 @@ static gchar *build_replace_placeholder(const GeanyDocument *doc, const gchar *s
 
 		/* replace %f with the filename (including extension) */
 		replacement = g_path_get_basename(filename);
+		
+		#ifdef G_OS_WIN32
+		{
+			//char *locale_text = g_locale_from_utf8(replacement, -1, NULL, NULL, NULL);
+			char *locale_text = g_convert(replacement, -1, "866", "UTF-8", NULL, NULL, NULL);
+			g_free(replacement);
+			replacement = locale_text;
+		}
+		#endif
+
 		utils_string_replace_all(stack, "%f", replacement);
 		g_free(replacement);
 
