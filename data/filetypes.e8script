@@ -22,7 +22,7 @@ date=date
 
 [keywords]
 # all items must be in one line
-keywords=и или не для из по каждого цикл если тогда конеццикла процедура конецпроцедуры функция конецфункции перем знач новый иначе иначеесли конецесли прервать продолжить неопределено попытка исключение конецпопытки вызватьисключение пока истина ложь экспорт возврат and or not in for each do if then enddo procedure endprocedure function endfunction var val new else elseif endif break continue undefined try exception endtry raise while true false export return 
+keywords=заявить assert и или не для из по каждого цикл если тогда конеццикла процедура конецпроцедуры функция конецфункции перем знач новый иначе иначеесли конецесли прервать продолжить неопределено попытка исключение конецпопытки вызватьисключение пока истина ложь экспорт возврат and or not in for each do if then enddo procedure endprocedure function endfunction var val new else elseif endif break continue undefined try exception endtry raise while true false export return 
 
 [lexer_properties]
 # only highlight keywords like read,write if in appropriate context
