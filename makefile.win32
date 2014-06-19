@@ -64,8 +64,21 @@ install:
 	-$(MKDIR) "$(DESTDIR)/lib"
 	$(CP) plugins$/*.dll "$(DESTDIR)/lib"
 	-$(MKDIR) "$(DESTDIR)/data"
+	$(CP) COPYING "$(DESTDIR)/Copying.txt"
+	$(CP) COPYING "$(DESTDIR)/data/GPL-2"
+	-$(MKDIR) "$(DESTDIR)/share"
+	-$(MKDIR) "$(DESTDIR)/share/locale"
+	-$(MKDIR) "$(DESTDIR)/include"
+	-$(MKDIR) "$(DESTDIR)/lib/pkgconfig"
 ifdef MSYS
 	cp -r data "$(DESTDIR)"
+	cp -r icons "$(DESTDIR)/share"
+	cp -r po "$(DESTDIR)/share/locale"
+	cp -r doc "$(DESTDIR)"
+	cp plugins/geanyfunctions.h "$(DESTDIR)/include"
+	cp plugins/geanyplugin.h "$(DESTDIR)/include"
+	cp geany.pc.in "$(DESTDIR)/lib/pkgconfig/geany.pc"
 else
 	xcopy /s /y data "$(DESTDIR)/data"
+	# TODO: copy commands for non-MSYS
 endif
