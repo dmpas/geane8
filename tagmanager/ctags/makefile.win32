@@ -55,7 +55,7 @@ vstring.o r.o
 	$(RANLIB) $@
 
 deps.mak:
-	$(CC) -MM  $(CFLAGS) *.c >deps.mak
+	-$(CC) -MM  $(CFLAGS) *.c >deps.mak 2>nul
 
 # Generate header dependencies with "make deps.mak"
 include deps.mak

@@ -72,7 +72,7 @@ clean:
 	-$(RM) deps.mak *.o *.dll
 
 deps.mak:
-	$(CC) -MM $(CFLAGS) $(DEFINES) $(INCLUDEDIRS) *.c >deps.mak
+	-$(CC) -MM $(CFLAGS) $(DEFINES) $(INCLUDEDIRS) *.c >deps.mak 2>nul
 
 # Generate header dependencies with "make deps.mak"
 include deps.mak
