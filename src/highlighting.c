@@ -975,6 +975,17 @@ static guint get_lexer_filetype(GeanyFiletype *ft)
 				highlighting_keywords_##LANG_NAME, \
 				HL_N_ENTRIES(highlighting_keywords_##LANG_NAME)); \
 		break
+		
+#define init_styleset_case_dup(NEW_NAME, LANG_NAME) \
+	case (GEANY_FILETYPES_##NEW_NAME): \
+		styleset_init_from_mapping(filetype_idx, config, configh, \
+				highlighting_styles_##LANG_NAME, \
+				HL_N_ENTRIES(highlighting_styles_##LANG_NAME), \
+				highlighting_keywords_##LANG_NAME, \
+				HL_N_ENTRIES(highlighting_keywords_##LANG_NAME)); \
+		break
+		
+
 
 /* Called by filetypes_load_config(). */
 void highlighting_init_styles(guint filetype_idx, GKeyFile *config, GKeyFile *configh)
@@ -1059,6 +1070,7 @@ void highlighting_init_styles(guint filetype_idx, GKeyFile *config, GKeyFile *co
 		init_styleset_case(XML);
 		init_styleset_case(YAML);
 		init_styleset_case(E8Script);
+		init_styleset_case_dup(OneScript, E8Script);
 		default:
 			if (ft->lexer_filetype)
 				geany_debug("Filetype %s has a recursive lexer_filetype %s set!",
@@ -1072,6 +1084,17 @@ void highlighting_init_styles(guint filetype_idx, GKeyFile *config, GKeyFile *co
 
 #define styleset_case(LANG_NAME) \
 	case (GEANY_FILETYPES_##LANG_NAME): \
+		styleset_from_mapping(sci, ft->id, highlighting_lexer_##LANG_NAME, \
+				highlighting_styles_##LANG_NAME, \
+				HL_N_ENTRIES(highlighting_styles_##LANG_NAME), \
+				highlighting_keywords_##LANG_NAME, \
+				HL_N_ENTRIES(highlighting_keywords_##LANG_NAME), \
+				highlighting_properties_##LANG_NAME, \
+				HL_N_ENTRIES(highlighting_properties_##LANG_NAME)); \
+		break
+
+#define styleset_case_dup(NEW_NAME, LANG_NAME) \
+	case (GEANY_FILETYPES_##NEW_NAME): \
 		styleset_from_mapping(sci, ft->id, highlighting_lexer_##LANG_NAME, \
 				highlighting_styles_##LANG_NAME, \
 				HL_N_ENTRIES(highlighting_styles_##LANG_NAME), \
@@ -1143,6 +1166,7 @@ void highlighting_set_styles(ScintillaObject *sci, GeanyFiletype *ft)
 		styleset_case(XML);
 		styleset_case(YAML);
 		styleset_case(E8Script);
+		styleset_case_dup(OneScript, E8Script);
 		case GEANY_FILETYPES_NONE:
 		default:
 			styleset_default(sci, ft->id);

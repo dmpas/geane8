@@ -722,12 +722,20 @@ GeanyDocument *document_new_file(const gchar *utf8_filename, GeanyFiletype *ft, 
 	sci_empty_undo_buffer(doc->editor->sci);
 
 	doc->encoding = g_strdup(encodings[file_prefs.default_new_encoding].charset);
+	
 	/* store the opened encoding for undo/redo */
 	store_saved_encoding(doc);
 
 	if (ft == NULL && utf8_filename != NULL) /* guess the filetype from the filename if one is given */
 		ft = filetypes_detect_from_document(doc);
 
+	if (ft) {
+		if (ft->id == GEANY_FILETYPES_OneScript) {
+			/* Always use BOM for OneScript */
+			doc->has_bom = TRUE;
+		}
+	}
+	
 	document_set_filetype(doc, ft); /* also re-parses tags */
 
 	ui_set_window_title(doc);
