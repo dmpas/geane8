@@ -3,6 +3,7 @@
 ;
 ; Copyright 2007-2012 Enrico Tröger <enrico(dot)troeger(at)uvena(dot)de>
 ; Copyright 2007-2012 Nick Treleaven <nick(dot)treleaven(at)btinternet(dot)com>
+; Copyright 2014      Sergey Batanov <sergey(dot)batanov(at)dmpas(dot)ru>
 ;
 ; This program is free software; you can redistribute it and/or modify
 ; it under the terms of the GNU General Public License as published by
@@ -34,8 +35,8 @@ RequestExecutionLevel highest ; set execution level for Windows Vista
 !define PRODUCT_NAME "Geany"
 !define PRODUCT_VERSION "1.25"
 !define PRODUCT_VERSION_ID "1.25.0.0"
-!define PRODUCT_PUBLISHER "The Geany developer team"
-!define PRODUCT_WEB_SITE "http://www.geany.org/"
+!define PRODUCT_PUBLISHER "dmpas.ru"
+!define PRODUCT_WEB_SITE "http://github.com/dmpas/geane8"
 !define PRODUCT_DIR_REGKEY "Software\Geany"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_EXE "$INSTDIR\bin\Geany.exe"
@@ -50,7 +51,7 @@ VIProductVersion "${PRODUCT_VERSION_ID}"
 VIAddVersionKey "ProductName" "${PRODUCT_NAME}"
 VIAddVersionKey "FileVersion" "${PRODUCT_VERSION}"
 VIAddVersionKey "ProductVersion" "${PRODUCT_VERSION}"
-VIAddVersionKey "LegalCopyright" "Copyright 2005-2014 by the Geany developer team"
+VIAddVersionKey "LegalCopyright" "Copyright 2005-2014 by the Geany developer team, 2014 dmpas.ru"
 VIAddVersionKey "FileDescription" "${PRODUCT_NAME} Installer"
 
 BrandingText "$(^NAME) installer (NSIS 2.46)"
@@ -231,6 +232,7 @@ SectionEnd
 
 ; Development files
 Section "Development files" SEC09
+	SectionIn 1
 	SetOverwrite ifnewer
 	SetOutPath "$INSTDIR\include"
 	File /r "${RESOURCEDIR}\include\*"
@@ -238,6 +240,16 @@ Section "Development files" SEC09
 	SetOutPath "$INSTDIR\lib\pkgconfig"
 	File "${RESOURCEDIR}\lib\pkgconfig\geany.pc"
 SectionEnd
+
+!ifdef INCLUDE_E8
+; E8 runtime
+Section "E8 Runtime" SEC10
+	SectionIn 1, 2
+	SetOverwrite ifnewer
+	SetOutPath "$INSTDIR\bin"
+	File /r "e8rt\*"
+SectionEnd
+!endif
 
 Section -AdditionalIcons
 	SetOutPath $INSTDIR
@@ -328,6 +340,7 @@ SectionEnd
 !insertmacro MUI_DESCRIPTION_TEXT ${SEC07} "Add context menu item 'Open With Geany'"
 !insertmacro MUI_DESCRIPTION_TEXT ${SEC08} "Create shortcuts for Geany on the desktop and in the Quicklaunch Bar"
 !insertmacro MUI_DESCRIPTION_TEXT ${SEC09} "You need these files only if you want to develop own plugins for Geany. If unsure, you can skip it."
+!insertmacro MUI_DESCRIPTION_TEXT ${SEC10} "E8:Script runtime files"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;;;;;;;;;;;;;;;;;;;;;
