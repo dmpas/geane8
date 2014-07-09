@@ -32,6 +32,13 @@ RequestExecutionLevel highest ; set execution level for Windows Vista
 ;;;;;;;;;;;;;;;;;;;
 ; helper defines  ;
 ;;;;;;;;;;;;;;;;;;;
+
+!ifdef BUILD_NUMBER
+!define BUILD_SUFFIX ".b${BUILD_NUMBER}"
+!else
+!define BUILD_SUFFIX ""
+!endif
+
 !define PRODUCT_NAME "Geany"
 !define PRODUCT_VERSION "1.25"
 !define PRODUCT_VERSION_ID "1.25.0.0"
@@ -44,13 +51,15 @@ RequestExecutionLevel highest ; set execution level for Windows Vista
 !define PRODUCT_EXT ".geany"
 !define RESOURCEDIR "geany-${PRODUCT_VERSION}"
 
+
+
 ;;;;;;;;;;;;;;;;;;;;;
 ; Version resource  ;
 ;;;;;;;;;;;;;;;;;;;;;
 VIProductVersion "${PRODUCT_VERSION_ID}"
 VIAddVersionKey "ProductName" "${PRODUCT_NAME}"
-VIAddVersionKey "FileVersion" "${PRODUCT_VERSION}"
-VIAddVersionKey "ProductVersion" "${PRODUCT_VERSION}"
+VIAddVersionKey "FileVersion" "${PRODUCT_VERSION}${BUILD_SUFFIX}"
+VIAddVersionKey "ProductVersion" "${PRODUCT_VERSION}${BUILD_SUFFIX}"
 VIAddVersionKey "LegalCopyright" "Copyright 2005-2014 by the Geany developer team, 2014 dmpas.ru"
 VIAddVersionKey "FileDescription" "${PRODUCT_NAME} Installer"
 
@@ -62,9 +71,9 @@ ShowInstDetails hide
 ShowUnInstDetails hide
 XPStyle on
 !ifdef INCLUDE_GTK
-OutFile "geany-${PRODUCT_VERSION}_setup.exe"
+OutFile "geany-${PRODUCT_VERSION}${BUILD_SUFFIX}_setup.exe"
 !else
-OutFile "geany-${PRODUCT_VERSION}_nogtk_setup.exe"
+OutFile "geany-${PRODUCT_VERSION}${BUILD_SUFFIX}_nogtk_setup.exe"
 !endif
 
 Var Answer
