@@ -257,6 +257,19 @@ Section "E8 Runtime" SEC10
 	SetOverwrite ifnewer
 	SetOutPath "$INSTDIR\bin"
 	File /r "e8rt\*"
+	
+	; Generate default configuration
+	FileOpen $1 "$INSTDIR\bin\e8script.cfg" w
+	
+	FileWrite $1 "UTF-8$\n"
+	FileWrite $1 "--input-encoding=utf-8$\n"
+	FileWrite $1 "--output-encoding=cp866$\n"
+	FileWrite $1 "--ext-path=$INSTDIR\bin$\n"
+	FileWrite $1 "--dl=e8std$\n"
+	FileWrite $1 "--dl=e8files$\n"
+	
+	FileClose $1
+	
 SectionEnd
 !endif
 
