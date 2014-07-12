@@ -7,6 +7,10 @@ DEFINES = -DHAVE_CONFIG_H \
 	-DGEANY_LIBDIR=\"\" \
 	-DGEANY_PREFIX=\"\" \
 	-DGTK
+	
+ifdef MINGW32
+DEFINES += -D_USE_32BIT_TIME_T
+endif
 
 .SUFFIXES: .c .o .h .a
 WINDRES = windres.exe
