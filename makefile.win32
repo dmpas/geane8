@@ -1,84 +1,106 @@
-# See http://www.geany.org/Support/BuildingOnWin32
-# Running make creates config.h then calls the sub makefiles.
-#
-# Other targets are:
-#	clean: clean all generated files
-#	install: install to DESTDIR
-#
-# localwin32.mk is an optional file to override make variables.
-# Use localwin32.mk instead of editing variables as it is included in sub
-# makefiles.
-# For MSYS set MSYS=1.
-# By default this should work in a Windows command prompt (cmd.exe).
+# Note: PACKAGE_DATA_DIR and PACKAGE_LOCALE_DIR are no longer used on Windows.
 
+DEFINES = -DHAVE_CONFIG_H \
+	-DGEANY_PRIVATE \
+	-DGEANY_DATADIR=\"data\" \
+	-DGEANY_LOCALEDIR=\"\" \
+	-DGEANY_LIBDIR=\"\" \
+	-DGEANY_PREFIX=\"\" \
+	-DGTK
+	
+ifdef mingw32
+DEFINES += -D_USE_32BIT_TIME_T
+endif
+
+ifdef MINGW32
+DEFINES += -D_USE_32BIT_TIME_T
+endif
+
+.SUFFIXES: .c .o .h .a
 WINDRES = windres.exe
 CC = gcc
 CXX = g++
-CP = copy /y
+RES = ../geany_private.res
+TARGET = ../geany.exe
+#PREFIX = C:/libs
+PREFIX = C:/home/dmpas/gtkmm64
 RM = del
-MKDIR = mkdir
-# $/ is used as a portable directory separator
-# strip is used to prevent line wrap
-/ := $(strip \)
-DESTDIR = C:/Program Files/Geany
--include localwin32.mk
+-include ../localwin32.mk
 
 ifdef MSYS
-CP = cp
 RM = rm -f
-/ = /
 endif
 
-all: config.h
-	$(MAKE) -C tagmanager/ctags -f makefile.win32
-	$(MAKE) -C tagmanager/mio -f makefile.win32
-	$(MAKE) -C tagmanager/src -f makefile.win32
-#	$(MAKE) -C scintilla -f makefile.win32
-	$(MAKE) -C plugins -f makefile.win32
-	$(MAKE) -C src -f makefile.win32
+GTK_INCLUDES= \
+	-I$(PREFIX)/include/gtk-2.0 \
+	-I$(PREFIX)/lib/gtk-2.0/include \
+	-I$(PREFIX)/include/atk-1.0 \
+	-I$(PREFIX)/include/cairo \
+	-I$(PREFIX)/include/gdk-pixbuf-2.0 \
+	-I$(PREFIX)/include/pango-1.0 \
+	-I$(PREFIX)/include/glib-2.0 \
+	-I$(PREFIX)/lib/glib-2.0/include \
+	-I$(PREFIX)/include \
+	-I$(PREFIX)/include/gettext
 
-config.h: win32-config.h
-	$(CP) $< $@
+INCLUDEDIRS=  -I.. \
+              -I../../e8-scintilla-patch/include \
+              -I../tagmanager/mio \
+              -I../tagmanager/src \
+              $(GTK_INCLUDES)
 
-# used by src/makefile.win32 to avoid del ../file which is an error
-clean-local:
-	-$(RM) geany_private.res geany.exe
+ALL_GTK_LIBS= \
+	-L"$(PREFIX)/lib" \
+	-lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangowin32-1.0 -lgdi32 \
+	-lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lgthread-2.0 -lglib-2.0 -lgthread-2.0 -lintl \
+	-lcairo -lpangocairo-1.0 -lgio-2.0
+	# these things are for GTK >= 2.8
+	# (should be same as with MSYS: pkg-config --libs gtk+-2.0 gthread-2.0)
+	#"$(PREFIX)/lib/libcairo.dll.a" \
+	#"$(PREFIX)/lib/asprintf.lib" \
+	#"$(PREFIX)/lib/charset.lib" \
 
-clean:
-	$(MAKE) -C tagmanager/ctags -f makefile.win32 clean
-	$(MAKE) -C tagmanager/mio -f makefile.win32 clean
-	$(MAKE) -C tagmanager/src -f makefile.win32 clean
-	$(MAKE) -C scintilla -f makefile.win32 clean
-	$(MAKE) -C plugins -f makefile.win32 clean
-	$(MAKE) -C src -f makefile.win32 clean
+WIN_LIBS=-mwindows -lole32 -luuid -liberty -lwsock32
 
-.PHONY: all clean clean-local install
-
-# likely requires admin privileges
-# mkdir output is ignored in case dir exists
-# 'copy' seems to only accept / in the destination
-install:
-	-$(MKDIR) "$(DESTDIR)"
-	-$(MKDIR) "$(DESTDIR)/bin"
-	$(CP) geany.exe "$(DESTDIR)/bin"
-	-$(MKDIR) "$(DESTDIR)/lib"
-	$(CP) plugins$/*.dll "$(DESTDIR)/lib"
-	-$(MKDIR) "$(DESTDIR)/data"
-	$(CP) COPYING "$(DESTDIR)/Copying.txt"
-	$(CP) COPYING "$(DESTDIR)/data/GPL-2"
-	-$(MKDIR) "$(DESTDIR)/share"
-	-$(MKDIR) "$(DESTDIR)/share/locale"
-	-$(MKDIR) "$(DESTDIR)/include"
-	-$(MKDIR) "$(DESTDIR)/lib/pkgconfig"
-ifdef MSYS
-	cp -r data "$(DESTDIR)"
-	cp -r icons "$(DESTDIR)/share"
-	cp -r po "$(DESTDIR)/share/locale"
-	cp -r doc "$(DESTDIR)"
-	cp plugins/geanyfunctions.h "$(DESTDIR)/include"
-	cp plugins/geanyplugin.h "$(DESTDIR)/include"
-	cp geany.pc.in "$(DESTDIR)/lib/pkgconfig/geany.pc"
+CBASEFLAGS=-Wall -pipe -mms-bitfields $(DEFINES) $(INCLUDEDIRS)
+ifdef DEBUG
+CFLAGS=-O0 -g $(CBASEFLAGS)
+DEFINES += -DGEANY_DEBUG
 else
-	xcopy /s /y data "$(DESTDIR)/data"
-	# TODO: copy commands for non-MSYS
+CFLAGS=-O2 $(CBASEFLAGS)
 endif
+
+OBJS =	about.o build.o callbacks.o dialogs.o document.o editor.o encodings.o filetypes.o \
+		geanyentryaction.o geanymenubuttonaction.o geanyobject.o geanywraplabel.o highlighting.o \
+		keybindings.o keyfile.o log.o main.o msgwindow.o navqueue.o notebook.o \
+		plugins.o pluginutils.o prefs.o printing.o project.o sciwrappers.o search.o \
+		socket.o stash.o symbols.o templates.o toolbar.o tools.o sidebar.o \
+		ui_utils.o utils.o win32.o
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+all: $(TARGET)
+
+$(RES): ../geany_private.rc ../icons/geany.ico
+	$(WINDRES) -i $< --input-format=rc -o $@ -O coff
+
+# this calls parent clean-local target because del ../file won't work
+clean:
+	-$(RM) deps.mak *.o
+	$(MAKE) -C .. -f makefile.win32 clean-local
+
+STLIBS = ../../e8-scintilla-patch/bin/scintilla.a ../tagmanager/ctags/ctags.a \
+	../tagmanager/mio/mio.a ../tagmanager/src/tagmanager.a
+
+$(TARGET): $(OBJS) $(RES) $(STLIBS)
+	$(CXX) $(OBJS) $(RES) -o $(TARGET) $(STLIBS) $(ALL_GTK_LIBS) $(WIN_LIBS)
+
+deps.mak:
+	-$(CC) -MM  $(CFLAGS) *.c >deps.mak 2>nul
+
+# Generate header dependencies with "make deps.mak"
+include deps.mak
+
+..\localwin32.mk:
+	echo # Set local variables here >$@
