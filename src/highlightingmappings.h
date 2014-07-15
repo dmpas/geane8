@@ -1378,7 +1378,8 @@ static const HLStyle highlighting_styles_SQL[] =
 	{ SCE_SQL_SQLPLUS,					"sqlplus",					FALSE },
 	{ SCE_SQL_SQLPLUS_PROMPT,			"sqlplus_prompt",			FALSE },
 	{ SCE_SQL_SQLPLUS_COMMENT,			"sqlplus_comment",			FALSE },
-	{ SCE_SQL_QUOTEDIDENTIFIER,			"quotedidentifier",			FALSE }
+	{ SCE_SQL_QUOTEDIDENTIFIER,			"quotedidentifier",			FALSE },
+	{ SCE_SQL_QUOTEDIDENTIFIER_MS,		"quotedidentifier",			FALSE }
 	/* these are for user-defined keywords we don't set yet */
 	/*{ SCE_SQL_USER1,					"user1",					FALSE },
 	{ SCE_SQL_USER2,					"user2",					FALSE },
