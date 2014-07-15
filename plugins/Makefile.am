@@ -39,7 +39,7 @@ MINGW_CFLAGS = \
 			-I$(top_srcdir) \
 			-I$(top_srcdir)/src \
 			-I$(top_srcdir)/tagmanager/src \
-			-I$(top_srcdir)/scintilla/include \
+			-I$(top_srcdir)/../e8-scintilla-patch/include \
 			$(GTK_CFLAGS) \
 			$(PLUGIN_CFLAGS)
 
@@ -107,7 +107,7 @@ AM_CPPFLAGS = \
 	-DGTK \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/tagmanager/src \
-	-I$(top_srcdir)/scintilla/include \
+	-I$(top_srcdir)/../e8-scintilla-patch/include \
 	$(GTK_CFLAGS) \
 	$(PLUGIN_CFLAGS)
 

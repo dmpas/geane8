@@ -132,8 +132,6 @@ AC_CONFIG_FILES([
 		tagmanager/ctags/Makefile
 		tagmanager/mio/Makefile
 		tagmanager/src/Makefile
-		scintilla/Makefile
-		scintilla/include/Makefile
 		src/Makefile
 		plugins/Makefile
 		po/Makefile.in

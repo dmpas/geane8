@@ -78,7 +78,7 @@ geany_include_HEADERS = \
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
-	-I$(top_srcdir)/scintilla/include \
+	-I$(top_srcdir)/../e8-scintilla-patch/include \
 	-I$(top_srcdir)/tagmanager/src \
 	@GTK_CFLAGS@ @GTHREAD_CFLAGS@
 
@@ -92,7 +92,7 @@ if MINGW
 geany_SOURCES = $(SRCS) win32.c win32.h
 
 geany_LDADD = \
-	$(top_builddir)/scintilla/libscintilla.a \
+	$(top_builddir)/../e8-scintilla-patch/bin/scintilla.a \
 	$(top_builddir)/tagmanager/ctags/libctags.a \
 	$(top_builddir)/tagmanager/mio/libmio.a \
 	$(top_builddir)/tagmanager/src/libtagmanager.a \
@@ -127,7 +127,7 @@ else
 geany_SOURCES = $(SRCS) vte.c vte.h
 
 geany_LDADD = \
-	$(top_builddir)/scintilla/libscintilla.a \
+	$(top_builddir)/../e8-scintilla-patch/bin/scintilla.a \
 	$(top_builddir)/tagmanager/ctags/libctags.a \
 	$(top_builddir)/tagmanager/mio/libmio.a \
 	$(top_builddir)/tagmanager/src/libtagmanager.a \

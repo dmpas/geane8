@@ -77,5 +77,5 @@ install-data-local:
 	$(mkinstalldirs) $(DOCDIR)/html
 	$(INSTALL_DATA) $(srcdir)/geany.html $(DOCDIR)/html/index.html
 	$(INSTALL_DATA) $(srcdir)/geany.txt $(DOCDIR)/manual.txt
-	$(INSTALL_DATA) $(top_srcdir)/scintilla/License.txt $(DOCDIR)/ScintillaLicense.txt
+#	$(INSTALL_DATA) $(top_srcdir)/scintilla/License.txt $(DOCDIR)/ScintillaLicense.txt
 
