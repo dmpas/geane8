@@ -189,8 +189,8 @@ static void init_builtin_filetypes(void)
 	FT_INIT( BATCH,      NONE,         "Batch",            NULL,                      SCRIPT,      SCRIPT   );
 	FT_INIT( POWERSHELL, NONE,         "PowerShell",       NULL,                      SOURCE_FILE, SCRIPT   );
 	FT_INIT( RUST,       RUST,         "Rust",             NULL,                      SOURCE_FILE, COMPILED );
-	FT_INIT( E8Script,   NONE,         "E8Script",         NULL,                      SOURCE_FILE, SCRIPT );
-	FT_INIT( OneScript,  NONE,         "OneScript",        NULL,                      SOURCE_FILE, SCRIPT );
+	FT_INIT( E8Script,   E8Script,     "E8Script",         NULL,                      SOURCE_FILE, SCRIPT );
+	FT_INIT( OneScript,  E8Script,     "OneScript",        NULL,                      SOURCE_FILE, SCRIPT );
 }
 
 
