@@ -103,15 +103,12 @@ static boolean try_word(const char *word)
 	if (intoken(dbp[len]))
 		return FALSE;
 	
-	char *local = malloc(len + 2);
+	char local[80];
 	strncpy(local, dbp, len);
 	local[len] = 0;
 	utf_lowercase(local);
 
 	int r = strcmp(local, word);
-	/*
-	free(local); TODO: На этом месте вылетает  (?)
-	*/
 	if (r == 0) {
 		dbp += len;
 		return TRUE;
@@ -198,7 +195,7 @@ static void findE8ScriptTags (void)
 					
 				vStringNCopyS (name, (const char*) dbp,  cp - dbp);
 					
-				createE8ScriptTag (&tag, name, kind, NULL, NULL);
+				createE8ScriptTag (&tag, name, K_VARIABLE, NULL, NULL);
 				dbp = cp;		/* set dbp to e-o-token */
 				makeE8ScriptTag (&tag);
 				
@@ -207,6 +204,12 @@ static void findE8ScriptTags (void)
 			else
 				++dbp;
 			
+		} else
+		if (state == VarDone) {
+		
+			if (*dbp == ',')
+				state = VarList;
+			++dbp;
 		} else
 			++dbp;
 	
