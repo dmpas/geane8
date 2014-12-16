@@ -181,12 +181,35 @@ static void findE8ScriptTags (void)
 				state = VarList;
 				++dbp;
 			} else
+			if (try_words("функция", "процедура", "function", "procedure", NULL)) {
+				state = SubName;
+				++dbp;
+			} else
 				++dbp;
 			
 		} else
+		if (state == SubName) {
+			if (starttoken(*dbp)) {
+				
+				const unsigned char *cp;
+			
+				for (cp = dbp  ;  *cp != '\0' && !endtoken (*cp)  ;  cp++)
+					continue;
+					
+				vStringNCopyS (name, (const char*) dbp,  cp - dbp);
+					
+				createE8ScriptTag (&tag, name, K_FUNCTION, NULL, NULL);
+				dbp = cp;		/* set dbp to e-o-token */
+				makeE8ScriptTag (&tag);
+				
+				state = Default;
+				
+			} else
+				++dbp;
+		} else
 		if (state == VarList) {
 			
-			if (intoken(*dbp)) {
+			if (starttoken(*dbp)) {
 				
 				const unsigned char *cp;
 			
