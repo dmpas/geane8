@@ -192,18 +192,23 @@ static void findE8ScriptTags (void)
 			}
 			if (*dbp == '*') {
 				++dbp;
-				if (!incomment)
+				if (!incomment) {
 					incomment = TRUE;
+					continue;
+				}
 			}
 		}
 		
 		if (*dbp == '"' || *dbp == '|') {
-			while (*dbp) {
-				if (++dbp == '"')
-					break;
-			}
+			
+			do {
+				++dbp;
+			} while (*dbp != '"' && *dbp != '\0');
+
 			if (*dbp)
 				++dbp;
+
+			continue;
 		}
 		
 		if (*dbp == ';') {
