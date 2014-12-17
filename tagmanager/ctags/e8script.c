@@ -182,7 +182,7 @@ static void findE8ScriptTags (void)
 			++dbp;
 			continue;
 		}
-			
+		
 		if (*dbp == '/') {
 			++dbp;
 			if (*dbp == '/') { /* "//" comment */
@@ -195,6 +195,15 @@ static void findE8ScriptTags (void)
 				if (!incomment)
 					incomment = TRUE;
 			}
+		}
+		
+		if (*dbp == '"' || *dbp == '|') {
+			while (*dbp) {
+				if (++dbp == '"')
+					break;
+			}
+			if (*dbp)
+				++dbp;
 		}
 		
 		if (*dbp == ';') {
