@@ -138,13 +138,13 @@ static boolean try_words(const char *word, ...)
 	return result;
 }
 
-enum __parse_state {Default, VarList, VarDone, SubName, SubDone};
+enum __parse_state {Default, VarList, VarDone, SubName, SubDone, InSub};
 
 static void findE8ScriptTags (void)
 {
 	
     vString *name = vStringNew ();
-    tagEntryInfo tag;
+    tagEntryInfo sub, var;
     char *arglist = NULL;
     E8Script_Kind kind = K_FUNCTION;
 	
@@ -155,6 +155,8 @@ static void findE8ScriptTags (void)
 	enum __parse_state state = Default;
 				   
 	boolean go_new_line = FALSE;
+	
+	char *in_func = NULL;
 
     dbp = fileReadLine ();
     while (dbp != NULL) {
@@ -170,8 +172,14 @@ static void findE8ScriptTags (void)
 			++dbp;
 			
 		if (*dbp == ';') {
-			state = Default;
+			
+			if (in_func)
+				state = InSub;
+			else
+				state = Default;
+				
 			++dbp;
+			
 			continue;
 		}
 		
@@ -188,6 +196,22 @@ static void findE8ScriptTags (void)
 				++dbp;
 			
 		} else
+		if (state == InSub) {
+		
+			if (try_words("var", "перем", NULL)) {
+				state = VarList;
+				++dbp;
+			} else
+			if (try_words("конецфункции", "конецпроцедуры", "endfunction", "endprocedure", NULL)) {
+				state = Default;
+				/* free(in_func); */
+				makeE8ScriptTag(&sub);
+				in_func = NULL;				
+				++dbp;
+			} else
+				++dbp;
+				
+		} else
 		if (state == SubName) {
 			if (starttoken(*dbp)) {
 				
@@ -198,12 +222,14 @@ static void findE8ScriptTags (void)
 					
 				vStringNCopyS (name, (const char*) dbp,  cp - dbp);
 					
-				createE8ScriptTag (&tag, name, K_FUNCTION, NULL, NULL);
+				createE8ScriptTag (&sub, name, K_FUNCTION, NULL, NULL);
 				dbp = cp;		/* set dbp to e-o-token */
-				makeE8ScriptTag (&tag);
+					
+				state = InSub;
+				in_func = vStringValue(name);
 				
-				state = Default;
-				
+				name = vStringNew ();
+					
 			} else
 				++dbp;
 		} else
@@ -217,12 +243,20 @@ static void findE8ScriptTags (void)
 					continue;
 					
 				vStringNCopyS (name, (const char*) dbp,  cp - dbp);
-					
-				createE8ScriptTag (&tag, name, K_VARIABLE, NULL, NULL);
 				dbp = cp;		/* set dbp to e-o-token */
-				makeE8ScriptTag (&tag);
+					
+				createE8ScriptTag (&var, name, K_VARIABLE, NULL, NULL);
+				
+				if (in_func) {
+					var.extensionFields.scope[0] = strdup("function");
+					var.extensionFields.scope[1] = strdup(in_func);
+				}
+				
+				makeE8ScriptTag (&var);
 				
 				state = VarDone;
+				
+				name = vStringNew ();
 			}
 			else
 				++dbp;
