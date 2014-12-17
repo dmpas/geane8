@@ -165,12 +165,38 @@ static void findE8ScriptTags (void)
 		
 		if (c == '\0' || go_new_line) {
 			dbp = fileReadLine();
+			go_new_line = FALSE;
 			continue;
 		}
 		
 		while (isspace(*dbp))
 			++dbp;
 			
+		if (incomment) {
+			if (*dbp == '*') {
+				++dbp;
+				if (incomment && *dbp == '/')
+					incomment = FALSE;
+			}
+			
+			++dbp;
+			continue;
+		}
+			
+		if (*dbp == '/') {
+			++dbp;
+			if (*dbp == '/') { /* "//" comment */
+				++dbp;
+				go_new_line = TRUE;
+				continue;
+			}
+			if (*dbp == '*') {
+				++dbp;
+				if (!incomment)
+					incomment = TRUE;
+			}
+		}
+		
 		if (*dbp == ';') {
 			
 			if (in_func)
