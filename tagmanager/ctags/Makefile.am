@@ -49,7 +49,8 @@ parsers = \
 	tcl.c \
 	txt2tags.c \
 	verilog.c \
-	vhdl.c
+	vhdl.c \
+	e8script.c 
 
 libctags_a_SOURCES = \
 	args.c \

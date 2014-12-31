@@ -67,7 +67,8 @@ filetypes = \
 	filetypes.verilog \
 	filetypes.vhdl \
 	filetypes.xml \
-	filetypes.yaml
+	filetypes.yaml \
+	filetypes.e8script
 
 tagfiles = \
 	c99.tags \
@@ -88,7 +89,8 @@ template_files = \
 	templates/files/main.py \
 	templates/files/main.vala \
 	templates/files/module.erl \
-	templates/files/program.pas
+	templates/files/program.pas \
+	templates/files/file.e8s
 
 templates = \
 	templates/bsd \

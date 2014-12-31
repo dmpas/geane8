@@ -20,7 +20,7 @@
 #include "main.h"
 #include "vstring.h"
 
-#include <stdio.h>
+#include <stdarg.h>
 
 /*
 *   DATA DEFINITIONS
@@ -58,7 +58,7 @@ static void createE8ScriptTag (tagEntryInfo* const tag,
 static void makeE8ScriptTag (const tagEntryInfo* const tag)
 {
     if (tag->name != NULL)
-	makeTagEntry (tag);
+		makeTagEntry (tag);
 }
 
 static const unsigned char* dbp;
@@ -66,21 +66,6 @@ static const unsigned char* dbp;
 #define starttoken(c) (isalpha ((int) c) || (int) c == '_')
 #define intoken(c)    (isalnum ((int) c) || (int) c == '_' || (int) c == '.' || ((int)c >= 0x80))
 #define endtoken(c)   (! intoken (c)  &&  ! isdigit ((int) c))
-
-static boolean tail (const char *cp)
-{
-    boolean result = FALSE;
-    register int len = 0;
-
-    while (*cp != '\0' && tolower ((int) *cp) == tolower ((int) dbp [len]))
-	cp++, len++;
-    if (*cp == '\0' && !intoken (dbp [len]))
-    {
-	dbp += len;
-	result = TRUE;
-    }
-    return result;
-}
 
 static int bukvaLower(int ch)
 {
@@ -114,16 +99,16 @@ static void utf_lowercase(char *s)
 static boolean try_word(const char *word)
 {
 	int len = strlen(word);
-	char *local = malloc(len + 1);
+	
+	if (intoken(dbp[len]))
+		return FALSE;
+	
+	char local[80];
 	strncpy(local, dbp, len);
 	local[len] = 0;
 	utf_lowercase(local);
-	
 
 	int r = strcmp(local, word);
-	/*
-	free(local); TODO: На этом месте вылетает  (?)
-	*/
 	if (r == 0) {
 		dbp += len;
 		return TRUE;
@@ -131,142 +116,203 @@ static boolean try_word(const char *word)
 	return FALSE;
 }
 
+static boolean try_words(const char *word, ...)
+{
+	va_list words;
+	va_start(words, word);
+	
+	const char *next_word = word;
+	
+	boolean result = FALSE;
+	
+	while (next_word) {
+		result = try_word(next_word);
+		if (result)
+			break;
+			
+		next_word = va_arg(words, const char *);
+	}
+	
+	va_end(words);
+	
+	return result;
+}
+
+enum __parse_state {Default, VarList, VarDone, SubName, SubDone, InSub};
+
 static void findE8ScriptTags (void)
 {
 	
     vString *name = vStringNew ();
-    tagEntryInfo tag;
+    tagEntryInfo sub, var;
     char *arglist = NULL;
-    char *vartype = NULL;
     E8Script_Kind kind = K_FUNCTION;
+	
 				/* each of these flags is TRUE iff: */
     boolean incomment = FALSE;	/* point is inside a comment */
-    int comment_char = '\0';    /* type of current comment */
     boolean inquote = FALSE;	/* point is inside '..' string */
-    boolean get_tagname = FALSE;/* point is after PROCEDURE/FUNCTION
-				    keyword, so next item = potential tag */
-    boolean found_tag = FALSE;	/* point is after a potential tag */
     boolean inparms = FALSE;	/* point is within parameter-list */
-    boolean verify_tag = FALSE;	/* point has passed the parm-list, so the
-				   next token will determine whether this
-				   is a FORWARD/EXTERN to be ignored, or
-				   whether it is a real tag */
+	enum __parse_state state = Default;
 				   
 	boolean go_new_line = FALSE;
+	
+	char *in_func = NULL;
 
     dbp = fileReadLine ();
     while (dbp != NULL) {
-		int c = *dbp++;
-
-		if (c == '\0' || go_new_line)		/* if end of line */
-		{
-			dbp = fileReadLine ();
+	
+		int c = *dbp;
+		
+		if (c == '\0' || go_new_line) {
+			dbp = fileReadLine();
 			go_new_line = FALSE;
-			if (dbp == NULL  ||  *dbp == '\0')
-				continue;
-			if (!((found_tag && verify_tag) || get_tagname))
-				c = *dbp++;		/* only if don't need *dbp pointing
-								to the beginning of the name of
-								the procedure or function */
+			continue;
 		}
+		
+		while (isspace(*dbp))
+			++dbp;
+			
 		if (incomment) {
-			if (comment_char == '/' && c == '*' && *dbp == '/') {
-				dbp++;
-				incomment = FALSE;
+			if (*dbp == '*') {
+				++dbp;
+				if (incomment && *dbp == '/')
+					incomment = FALSE;
 			}
+			
+			++dbp;
 			continue;
 		}
-		else if (inquote) {
-			if (c == '\"')
-				inquote = FALSE;
-			continue;
-		}
-		else switch (c) {
-			case '\"':
-					inquote = TRUE;	/* found first quote */
-					continue;
-			case '/':
-					if (*dbp == '/') {
-						go_new_line = TRUE;
-						continue;
-					}
-					if (*dbp == '*') {	/* found open (* comment */
-						incomment = TRUE;
-						comment_char = c;
-						dbp++;
-					}
-					break;
-			case '(':
-					if (found_tag)  /* found '(' after tag, i.e., parm-list */
-						inparms = TRUE;
-					continue;
-			case ')':		/* end of parms list */
-					if (inparms)
-						inparms = FALSE;
-					continue;
-		}
-		if (found_tag /*&& verify_tag*/ && *dbp != ' ') {
-			if (*dbp == '\0')
-				continue;
-			if (found_tag /*&& verify_tag*/) { /* not external proc, so make tag */
-				found_tag = FALSE;
-				verify_tag = FALSE;
-				makeE8ScriptTag (&tag);
+		
+		if (*dbp == '/') {
+			++dbp;
+			if (*dbp == '/') { /* "//" comment */
+				++dbp;
+				go_new_line = TRUE;
 				continue;
 			}
-		}
-		if (get_tagname)		/* grab name of proc or fn */
-		{
-			const unsigned char *cp;
-
-			if (*dbp == '\0')
-				continue;
-
-			/* grab block name */
-			while (isspace ((int) *dbp))
+			if (*dbp == '*') {
 				++dbp;
-				
-			for (cp = dbp  ;  *cp != '\0' && !endtoken (*cp)  ;  cp++)
-				continue;
-				
-			vStringNCopyS (name, (const char*) dbp,  cp - dbp);
-			if (arglist != NULL)
-				eFree(arglist);
-				
-			if (kind == K_FUNCTION && vartype != NULL)
-				eFree(vartype);
-				
-			createE8ScriptTag (&tag, name, kind, arglist, (kind == K_FUNCTION) ? vartype : NULL);
-			dbp = cp;		/* set dbp to e-o-token */
-			get_tagname = FALSE;
-			found_tag = TRUE;
-			/* and proceed to check for "extern" */
+				if (!incomment) {
+					incomment = TRUE;
+					continue;
+				}
+			}
 		}
-		else if (!incomment && !inquote && !found_tag) {
-			--dbp;
-			if (try_word("procedure")) {
-				get_tagname = TRUE;
-				kind = K_FUNCTION;
+		
+		if (*dbp == '"' || *dbp == '|') {
+			
+			do {
+				++dbp;
+			} while (*dbp != '"' && *dbp != '\0');
+
+			if (*dbp)
+				++dbp;
+
+			continue;
+		}
+		
+		if (*dbp == ';') {
+			
+			if (in_func)
+				state = InSub;
+			else
+				state = Default;
+				
+			++dbp;
+			
+			continue;
+		}
+		
+		if (state == Default) {
+			
+			if (try_words("var", "перем", NULL)) {
+				state = VarList;
+				++dbp;
 			} else
-			if (try_word("function")) {
-				get_tagname = TRUE;
-				kind = K_FUNCTION;
-			} else
-			if (try_word("процедура")) {
-				get_tagname = TRUE;
-				kind = K_FUNCTION;
-			} else
-			if (try_word("функция")) {
-				get_tagname = TRUE;
-				kind = K_FUNCTION;
+			if (try_words("функция", "процедура", "function", "procedure", NULL)) {
+				state = SubName;
+				++dbp;
 			} else
 				++dbp;
-		}
+			
+		} else
+		if (state == InSub) {
+		
+			if (try_words("var", "перем", NULL)) {
+				state = VarList;
+				++dbp;
+			} else
+			if (try_words("конецфункции", "конецпроцедуры", "endfunction", "endprocedure", NULL)) {
+				state = Default;
+				/* free(in_func); */
+				makeE8ScriptTag(&sub);
+				in_func = NULL;				
+				++dbp;
+			} else
+				++dbp;
+				
+		} else
+		if (state == SubName) {
+			if (starttoken(*dbp)) {
+				
+				const unsigned char *cp;
+			
+				for (cp = dbp  ;  *cp != '\0' && !endtoken (*cp)  ;  cp++)
+					continue;
+					
+				vStringNCopyS (name, (const char*) dbp,  cp - dbp);
+					
+				createE8ScriptTag (&sub, name, K_FUNCTION, NULL, NULL);
+				dbp = cp;		/* set dbp to e-o-token */
+					
+				state = InSub;
+				in_func = vStringValue(name);
+				
+				name = vStringNew ();
+					
+			} else
+				++dbp;
+		} else
+		if (state == VarList) {
+			
+			if (starttoken(*dbp)) {
+				
+				const unsigned char *cp;
+			
+				for (cp = dbp  ;  *cp != '\0' && !endtoken (*cp)  ;  cp++)
+					continue;
+					
+				vStringNCopyS (name, (const char*) dbp,  cp - dbp);
+				dbp = cp;		/* set dbp to e-o-token */
+					
+				createE8ScriptTag (&var, name, K_VARIABLE, NULL, NULL);
+				
+				if (in_func) {
+					var.extensionFields.scope[0] = strdup("function");
+					var.extensionFields.scope[1] = strdup(in_func);
+				}
+				
+				makeE8ScriptTag (&var);
+				
+				state = VarDone;
+				
+				name = vStringNew ();
+			}
+			else
+				++dbp;
+			
+		} else
+		if (state == VarDone) {
+		
+			if (*dbp == ',')
+				state = VarList;
+			++dbp;
+		} else
+			++dbp;
+	
     }  /* while not eof */
     if (arglist != NULL)
 		eFree(arglist);
-    if (vartype != NULL)
-		eFree(vartype);
     vStringDelete(name);
 }
 
